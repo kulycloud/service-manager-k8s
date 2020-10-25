@@ -1,12 +1,13 @@
 package main
 
 import (
-commonCommunication "github.com/kulycloud/common/communication"
-"github.com/kulycloud/common/logging"
-"github.com/kulycloud/service-manager-k8s/communication"
-"github.com/kulycloud/service-manager-k8s/config"
-"golang.org/x/net/context"
-"time"
+	commonCommunication "github.com/kulycloud/common/communication"
+	"github.com/kulycloud/common/logging"
+	"github.com/kulycloud/service-manager-k8s/communication"
+	"github.com/kulycloud/service-manager-k8s/config"
+	"github.com/kulycloud/service-manager-k8s/reconciling"
+	"golang.org/x/net/context"
+	"time"
 )
 
 var logger = logging.GetForComponent("init")
@@ -19,6 +20,17 @@ func main() {
 		logger.Fatalw("Error parsing config", "error", err)
 	}
 	logger.Infow("Finished parsing config")
+
+	ctx := context.Background()
+	r, err := reconciling.NewReconciler(ctx)
+	if err != nil {
+		logger.Fatalw("could not connect to cluster: %w", err)
+	}
+
+	err = r.CheckAndSetup(ctx)
+	if err != nil {
+		logger.Fatalw("could not setup cluster: %w", err)
+	}
 
 	go registerLoop()
 
