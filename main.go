@@ -22,7 +22,7 @@ func main() {
 	logger.Infow("Finished parsing config")
 
 	ctx := context.Background()
-	r, err := reconciling.NewReconciler(ctx)
+	r, err := reconciling.NewReconciler()
 	if err != nil {
 		logger.Fatalw("could not connect to cluster: %w", err)
 	}
@@ -40,8 +40,8 @@ func main() {
 		logger.Panicw("error initializing listener", "error", err)
 	}
 
-	handler := communication.NewServiceManagerHandler()
-	handler.Register(listener)
+	handler := communication.NewServiceManagerHandler(r, listener)
+	handler.Register()
 
 	if err = listener.Serve(); err != nil {
 		logger.Panicw("error serving listener", "error", err)

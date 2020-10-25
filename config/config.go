@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	commonConfig "github.com/kulycloud/common/config"
 )
 
@@ -15,8 +14,6 @@ type Config struct {
 }
 
 var GlobalConfig = &Config{}
-
-var ErrNoKubeconfig = errors.New("no kubeconfig specified")
 
 func ParseConfig() error {
 	parser := commonConfig.NewParser()
