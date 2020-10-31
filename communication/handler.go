@@ -17,6 +17,7 @@ var ErrStorageNotReady = errors.New("storage is not ready")
 var logger = logging.GetForComponent("handler")
 
 type ServiceManagerHandler struct {
+	protoServices.UnimplementedServiceManagerServer
 	reconciler *reconciling.Reconciler
 	listener *commonCommunication.Listener
 }
