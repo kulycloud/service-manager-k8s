@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	protoCommon "github.com/kulycloud/protocol/common"
+	"github.com/kulycloud/service-manager-k8s/communication"
 	"github.com/kulycloud/service-manager-k8s/config"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -125,12 +126,22 @@ func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, servic
 		return fmt.Errorf("could not set LoadBalancers in storage: %w", err)
 	}
 
-	svcs, err := r.getRunningPodEndpoints(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.HTTPPort)
+	services, err := r.getRunningPodEndpoints(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.HTTPPort)
 	if err != nil {
 		return err
 	}
 
-	logger.Infow("update loadbalancer", "namespace", namespace, "service", serviceName, "error", err, "svcs", svcs)
+	communicator, err := communication.NewMultiLoadBalancerCommunicator(lbs)
+	if err != nil {
+		logger.Warnw("error connecting to load balancers", "error", err, "namespace", namespace, "service", serviceName)
+	}
+
+	err = communicator.SetEndpoints(ctx, services)
+
+	if err != nil {
+		logger.Warnw("error connecting to load balancers", "error", err, "namespace", namespace, "service", serviceName)
+		return err
+	}
 
 	return nil
 }

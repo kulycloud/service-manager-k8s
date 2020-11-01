@@ -42,7 +42,7 @@ func main() {
 		logger.Panicw("error initializing listener", "error", err)
 	}
 
-	handler := communication.NewServiceManagerHandler(r, listener)
+	handler := communication.NewServiceManagerHandler(r.ReconcileDeployments, listener)
 	handler.Register()
 
 	go r.WatchPods(context.Background())

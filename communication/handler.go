@@ -7,7 +7,6 @@ import (
 	"github.com/kulycloud/common/logging"
 	protoCommon "github.com/kulycloud/protocol/common"
 	protoServices "github.com/kulycloud/protocol/services"
-	"github.com/kulycloud/service-manager-k8s/reconciling"
 )
 
 var _ protoServices.ServiceManagerServer = &ServiceManagerHandler{}
@@ -16,13 +15,15 @@ var ErrStorageNotReady = errors.New("storage is not ready")
 
 var logger = logging.GetForComponent("handler")
 
+type ReconcileFunc = func(context.Context, string) error
+
 type ServiceManagerHandler struct {
 	protoServices.UnimplementedServiceManagerServer
-	reconciler *reconciling.Reconciler
+	reconciler ReconcileFunc
 	listener *commonCommunication.Listener
 }
 
-func NewServiceManagerHandler(reconciler *reconciling.Reconciler, listener *commonCommunication.Listener) *ServiceManagerHandler {
+func NewServiceManagerHandler(reconciler ReconcileFunc, listener *commonCommunication.Listener) *ServiceManagerHandler {
 	return &ServiceManagerHandler{
 		reconciler: reconciler,
 		listener: listener,
@@ -39,5 +40,5 @@ func (handler *ServiceManagerHandler) Reconcile(ctx context.Context, request *pr
 	}
 
 	logger.Info("Starting reconcile!")
-	return &protoCommon.Empty{}, handler.reconciler.ReconcileDeployments(ctx, request.Namespace)
+	return &protoCommon.Empty{}, handler.reconciler(ctx, request.Namespace)
 }
