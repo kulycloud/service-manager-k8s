@@ -88,13 +88,17 @@ func isPodReady(pod *corev1.Pod) bool {
 	return false
 }
 
-func (r *Reconciler) getRunningPodEndpoints(ctx context.Context, namespace string, serviceName string, typeName string, port uint32) ([]*protoCommon.Endpoint, error) {
-	pods, err := r.clientset.CoreV1().Pods(config.GlobalConfig.ServiceNamespace).List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s,%s=%s,%s=%s", namespaceLabel, namespace, nameLabel, serviceName, typeLabel, typeName)})
+func (r *Reconciler) getRunningPodEndpointsForServiceAndType(ctx context.Context, namespace string, serviceName string, typeName string, port uint32) ([]*protoCommon.Endpoint, error) {
+	return r.getRunningPodEndpointsFromListOptions(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s,%s=%s,%s=%s", namespaceLabel, namespace, nameLabel, serviceName, typeLabel, typeName)}, port)
+}
+
+func (r *Reconciler) getRunningPodEndpointsFromListOptions(ctx context.Context, options metav1.ListOptions, port uint32) ([]*protoCommon.Endpoint, error) {
+	pods, err := r.clientset.CoreV1().Pods(config.GlobalConfig.ServiceNamespace).List(ctx, options)
 	if err != nil {
 		return nil, err
 	}
 
-	ips := make([]*protoCommon.Endpoint, 0)
+	endpoints := make([]*protoCommon.Endpoint, 0)
 
 	for _, pod := range pods.Items {
 		if pod.DeletionTimestamp != nil {
@@ -109,14 +113,14 @@ func (r *Reconciler) getRunningPodEndpoints(ctx context.Context, namespace strin
 			continue // Pod has no IP
 		}
 
-		ips = append(ips, &protoCommon.Endpoint{ Host: pod.Status.PodIP, Port: port})
+		endpoints = append(endpoints, &protoCommon.Endpoint{ Host: pod.Status.PodIP, Port: port})
 	}
 
-	return ips, nil
+	return endpoints, nil
 }
 
 func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, serviceName string) error {
-	lbs, err := r.getRunningPodEndpoints(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.LoadBalancerControlPort)
+	lbs, err := r.getRunningPodEndpointsForServiceAndType(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.LoadBalancerControlPort)
 	if err != nil {
 		return err
 	}
@@ -126,7 +130,7 @@ func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, servic
 		return fmt.Errorf("could not set LoadBalancers in storage: %w", err)
 	}
 
-	services, err := r.getRunningPodEndpoints(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.HTTPPort)
+	services, err := r.getRunningPodEndpointsForServiceAndType(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.HTTPPort)
 	if err != nil {
 		return err
 	}
@@ -136,7 +140,7 @@ func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, servic
 		logger.Warnw("error connecting to load balancers", "error", err, "namespace", namespace, "service", serviceName)
 	}
 
-	err = communicator.SetEndpoints(ctx, services)
+	err = communicator.Update(ctx, services, r.storage.Endpoints)
 
 	if err != nil {
 		logger.Warnw("error connecting to load balancers", "error", err, "namespace", namespace, "service", serviceName)
@@ -144,4 +148,22 @@ func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, servic
 	}
 
 	return nil
+}
+
+func (r *Reconciler) PropagateStorageToLoadBalancers(ctx context.Context, endpoints []*protoCommon.Endpoint) {
+	lbEndpoints, err := r.getRunningPodEndpointsFromListOptions(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s", typeLabel, typeLabelLB)}, config.GlobalConfig.LoadBalancerControlPort)
+	if err != nil {
+		logger.Warnf("error getting load balancers from cluster", "error", err)
+		return
+	}
+
+	comm, err := communication.NewMultiLoadBalancerCommunicator(lbEndpoints)
+	if err != nil {
+		logger.Warnf("error connecting to load balancers", "error", err)
+	}
+
+	err = comm.RegisterStorageEndpoints(ctx, endpoints)
+	if err != nil {
+		logger.Warnf("error propagating storage to load balancers", "error", err)
+	}
 }

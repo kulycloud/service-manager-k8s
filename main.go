@@ -29,6 +29,8 @@ func main() {
 		logger.Fatalw("could not connect to cluster: %w", err)
 	}
 
+	listener.NewStorageHandlers = append(listener.NewStorageHandlers, r.PropagateStorageToLoadBalancers)
+
 	err = r.CheckAndSetup(ctx)
 	if err != nil {
 		logger.Fatalw("could not setup cluster: %w", err)

@@ -57,12 +57,18 @@ func (lbs MultiLoadBalancerCommunicator) RegisterStorageEndpoints(ctx context.Co
 	return mergeErrors(errs)
 }
 
-func (lbs MultiLoadBalancerCommunicator) SetEndpoints(ctx context.Context, endpoints []*protoCommon.Endpoint) error {
-	el := &protoCommon.EndpointList{Endpoints: endpoints}
+func (lbs MultiLoadBalancerCommunicator) Update(ctx context.Context, serviceEndpoints []*protoCommon.Endpoint, storageEndpoints []*protoCommon.Endpoint) error {
+	serviceEL := &protoCommon.EndpointList{Endpoints: serviceEndpoints}
+	storageEL := &protoCommon.EndpointList{Endpoints: storageEndpoints}
+
 	errs := make([]error, 0)
 
 	for _, lbc := range lbs {
-		_, err := lbc.client.SetEndpoints(ctx, el)
+		_, err := lbc.client.SetEndpoints(ctx, serviceEL)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		_, err = lbc.Client.RegisterStorageEndpoints(ctx, storageEL)
 		if err != nil {
 			errs = append(errs, err)
 		}
