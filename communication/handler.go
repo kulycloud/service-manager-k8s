@@ -39,5 +39,5 @@ func (handler *ServiceManagerHandler) Reconcile(ctx context.Context, request *pr
 	}
 
 	logger.Info("Starting reconcile!")
-	return &protoCommon.Empty{}, handler.reconciler.ReconcileNamespace(ctx, request.Namespace, handler.listener.Storage)
+	return &protoCommon.Empty{}, handler.reconciler.ReconcileDeployments(ctx, request.Namespace)
 }

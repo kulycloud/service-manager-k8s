@@ -21,8 +21,10 @@ func main() {
 	}
 	logger.Infow("Finished parsing config")
 
+	listener := commonCommunication.NewListener(logging.GetForComponent("listener"))
+
 	ctx := context.Background()
-	r, err := reconciling.NewReconciler()
+	r, err := reconciling.NewReconciler(listener.Storage)
 	if err != nil {
 		logger.Fatalw("could not connect to cluster: %w", err)
 	}
@@ -35,7 +37,7 @@ func main() {
 	go registerLoop()
 
 	logger.Info("Starting listener")
-	listener := commonCommunication.NewListener(logging.GetForComponent("listener"))
+
 	if err = listener.Setup(config.GlobalConfig.Port); err != nil {
 		logger.Panicw("error initializing listener", "error", err)
 	}
@@ -43,11 +45,11 @@ func main() {
 	handler := communication.NewServiceManagerHandler(r, listener)
 	handler.Register()
 
+	go r.WatchPods(context.Background())
+
 	if err = listener.Serve(); err != nil {
 		logger.Panicw("error serving listener", "error", err)
 	}
-
-	listener.Storage.Ready()
 }
 
 func registerLoop() {
