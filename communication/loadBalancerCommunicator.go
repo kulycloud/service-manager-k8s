@@ -64,11 +64,11 @@ func (lbs MultiLoadBalancerCommunicator) Update(ctx context.Context, serviceEndp
 	errs := make([]error, 0)
 
 	for _, lbc := range lbs {
-		_, err := lbc.client.SetEndpoints(ctx, serviceEL)
+		_, err := lbc.Client.RegisterStorageEndpoints(ctx, storageEL)
 		if err != nil {
 			errs = append(errs, err)
 		}
-		_, err = lbc.Client.RegisterStorageEndpoints(ctx, storageEL)
+		_, err = lbc.client.SetEndpoints(ctx, serviceEL)
 		if err != nil {
 			errs = append(errs, err)
 		}
