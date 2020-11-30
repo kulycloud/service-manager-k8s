@@ -155,6 +155,10 @@ func buildLoadBalancerDeploymentFromService(name *protoStorage.NamespacedName, s
 									Name: "PORT",
 									Value: strconv.FormatInt(int64(config.GlobalConfig.LoadBalancerControlPort), 10),
 								},
+								{
+									Name: "HTTP_PORT",
+									Value: strconv.FormatInt(int64(config.GlobalConfig.HTTPPort), 10),
+								},
 							},
 						},
 					},

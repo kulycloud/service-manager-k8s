@@ -125,12 +125,7 @@ func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, servic
 		return err
 	}
 
-	err = r.storage.SetServiceLBEndpoints(ctx, namespace, serviceName, lbs)
-	if err != nil {
-		return fmt.Errorf("could not set LoadBalancers in storage: %w", err)
-	}
-
-	services, err := r.getRunningPodEndpointsForServiceAndType(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.HTTPPort)
+	services, err := r.getRunningPodEndpointsForServiceAndType(ctx, namespace, serviceName, typeLabelService, config.GlobalConfig.HTTPPort)
 	if err != nil {
 		return err
 	}
@@ -145,6 +140,16 @@ func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, servic
 	if err != nil {
 		logger.Warnw("error connecting to load balancers", "error", err, "namespace", namespace, "service", serviceName)
 		return err
+	}
+
+	lbHttpPorts, err := r.getRunningPodEndpointsForServiceAndType(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.HTTPPort)
+	if err != nil {
+		return err
+	}
+
+	err = r.storage.SetServiceLBEndpoints(ctx, namespace, serviceName, lbHttpPorts)
+	if err != nil {
+		return fmt.Errorf("could not set LoadBalancers in storage: %w", err)
 	}
 
 	return nil
