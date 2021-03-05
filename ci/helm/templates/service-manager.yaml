@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    deploy.cloud.kuly/app: service-manager-k8s
+  name: service-manager-k8s
+  namespace: kuly-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deploy.cloud.kuly/app: service-manager-k8s
+  template:
+    metadata:
+      labels:
+        deploy.cloud.kuly/app: service-manager-k8s
+    spec:
+      serviceAccountName: scheduler-account
+      containers:
+      - image: {{ .Values.image }}
+        imagePullPolicy: Always
+        name: service-manager-k8s
+        ports:
+        - containerPort: 12270
+          name: rpc
+        env:
+        - name: HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: PORT
+          value: "12270"
+        - name: SERVICE_NAMESPACE
+          value: kuly-services
+        - name: LOAD_BALANCER_IMAGE
+          value: {{ .Values.loadBalancerImage }}
+        - name: CONTROL_PLANE_HOST
+          value: control-plane
+        - name: CONTROL_PLANE_PORT
+          value: "12270"
+        resources: {}
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: scheduler-account
+  namespace: kuly-platform
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: scheduler-role
+  namespace: kuly-platform
+rules:
+  - apiGroups: ["", "apps"]
+    resources: ["pods", "deployments", "secrets", "namespaces"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: scheduler-binding
+  namespace: kuly-platform
+subjects:
+- kind: ServiceAccount
+  name: scheduler-account
+  namespace: kuly-platform
+roleRef:
+  kind: ClusterRole
+  name: scheduler-role
+  apiGroup: rbac.authorization.k8s.io

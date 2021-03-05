@@ -1,0 +1,7 @@
+apiVersion: v2
+name: service-manager-k8s
+description: Kuly kubernetes service manager
+
+type: application
+version: 0.1.0
+appVersion: "0.1.0-indev"
