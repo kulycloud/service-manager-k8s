@@ -1,1 +1,2 @@
 image: ghcr.io/kuly/service-manager-k8s
+loadBalancerImage: ghcr.io/kuly/load-balancer:latest
