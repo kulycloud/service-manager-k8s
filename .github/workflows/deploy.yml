@@ -27,5 +27,5 @@ jobs:
     - name: Deploy
       uses: WyriHaximus/github-action-helm3@v2
       with:
-        exec: helm upgrade service-manager-k8s ./ci/helm/ --install --wait --atomic --set=image=${{ env.IMAGE }} --set=loadBalancerImage=ghcr.io/kulycloud/load-balancer:latest-dev
+        exec: helm upgrade service-manager-k8s ./ci/helm/ --install --wait --atomic --set=image=${{ env.IMAGE }}
         kubeconfig: '${{ secrets.KUBECONFIG }}'
