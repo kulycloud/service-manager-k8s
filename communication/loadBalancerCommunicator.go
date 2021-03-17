@@ -48,7 +48,7 @@ func (lbs MultiLoadBalancerCommunicator) RegisterStorageEndpoints(ctx context.Co
 	errs := make([]error, 0)
 
 	for _, lbc := range lbs {
-		err := lbc.RegisterStorageEndpoints(ctx, endpoints)
+		_, err := lbc.client.SetStorageEndpoints(ctx, &protoCommon.EndpointList{Endpoints: endpoints})
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -64,7 +64,7 @@ func (lbs MultiLoadBalancerCommunicator) Update(ctx context.Context, serviceEndp
 	errs := make([]error, 0)
 
 	for _, lbc := range lbs {
-		_, err := lbc.Client.RegisterStorageEndpoints(ctx, storageEL)
+		_, err := lbc.client.SetStorageEndpoints(ctx, storageEL)
 		if err != nil {
 			errs = append(errs, err)
 		}
