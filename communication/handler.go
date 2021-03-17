@@ -36,7 +36,7 @@ func (handler *ServiceManagerHandler) Register() {
 }
 
 func (handler *ServiceManagerHandler) Reconcile(ctx context.Context, request *protoServices.ReconcileRequest) (*protoCommon.Empty, error) {
-	if !ControlPlane.Storage.Ready() {
+	if ControlPlane == nil || !ControlPlane.Storage.Ready() {
 		return nil, ErrStorageNotReady
 	}
 
