@@ -181,6 +181,8 @@ github.com/kulycloud/common v0.0.0-20210317192529-65d5287353ce h1:HuQx+0WfQ/YurH
 github.com/kulycloud/common v0.0.0-20210317192529-65d5287353ce/go.mod h1:E+Su9D6lW+QA0FsQF+kuHpnU9ySnjMD7JCzMXDq0efI=
 github.com/kulycloud/common v0.0.0-20210319003959-530ee5e8b1e3 h1:VR0kjztX1vCgqxvl1jkvtrF4TVhyInQGDa9/5CR3Kcc=
 github.com/kulycloud/common v0.0.0-20210319003959-530ee5e8b1e3/go.mod h1:gTKRKLrsupfHX9hwPBOyDiSrAxOKn5HQjR5gJ/H2/Lo=
+github.com/kulycloud/common v0.0.0-20210323100819-93d825d597b5 h1:jrwP7ue7waGFNwRSKf2oDbxzLw0L9va0L7PCLtWWgvE=
+github.com/kulycloud/common v0.0.0-20210323100819-93d825d597b5/go.mod h1:BGyUyF3p9c/ZBtWA/kNPp0MxV6pC84oJwYxqL6zoQ2k=
 github.com/kulycloud/protocol v0.0.0-20210303190205-727e9c8daa90 h1:0W/N3YULxYxH8uQF9DTQIqIfPsRuezIfLKK2uuSQmfo=
 github.com/kulycloud/protocol v0.0.0-20210303190205-727e9c8daa90/go.mod h1:0ew/OZBNjY27vlfb0xrgaTDp/3A5SM6SepXtWUAd8YY=
 github.com/kulycloud/protocol v0.0.0-20210317180715-ff3830aafecd/go.mod h1:0ew/OZBNjY27vlfb0xrgaTDp/3A5SM6SepXtWUAd8YY=
@@ -188,6 +190,8 @@ github.com/kulycloud/protocol v0.0.0-20210317200650-299de70160ef h1:QTUqtJDuS1mk
 github.com/kulycloud/protocol v0.0.0-20210317200650-299de70160ef/go.mod h1:0ew/OZBNjY27vlfb0xrgaTDp/3A5SM6SepXtWUAd8YY=
 github.com/kulycloud/protocol v0.0.0-20210319003638-857838179fbd h1:MwqabfiYihaCSkR35j63lew+XFAVMWPynteR4E6BUJE=
 github.com/kulycloud/protocol v0.0.0-20210319003638-857838179fbd/go.mod h1:0ew/OZBNjY27vlfb0xrgaTDp/3A5SM6SepXtWUAd8YY=
+github.com/kulycloud/protocol v0.0.0-20210323100304-4caa455444f5 h1:0XR6DQMjHodqrpnKNivH7dmE5pjqhma7HCI0gvP95WU=
+github.com/kulycloud/protocol v0.0.0-20210323100304-4caa455444f5/go.mod h1:0ew/OZBNjY27vlfb0xrgaTDp/3A5SM6SepXtWUAd8YY=
 github.com/mailru/easyjson v0.0.0-20160728113105-d5b7844b561a h1:TpvdAwDAt1K4ANVOfcihouRdvP+MgAfDWwBuct4l6ZY=
 github.com/mailru/easyjson v0.0.0-20160728113105-d5b7844b561a/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
