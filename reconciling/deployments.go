@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (r *Reconciler) ReconcileDeployments(ctx context.Context, namespace string) error {
+func (r *KubernetesReconciler) ReconcileDeployments(ctx context.Context, namespace string) error {
 	// Storage should be ready
 	serviceNames, err := r.storage.GetServicesInNamespace(ctx, namespace)
 	if err != nil {

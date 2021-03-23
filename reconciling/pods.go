@@ -12,7 +12,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func (r *Reconciler) WatchPods(ctx context.Context) error {
+func (r *KubernetesReconciler) MonitorCluster(ctx context.Context) error {
 
 	watchlist := cache.NewListWatchFromClient(
 		r.clientset.CoreV1().RESTClient(),
@@ -59,7 +59,7 @@ func (r *Reconciler) WatchPods(ctx context.Context) error {
 	return nil
 }
 
-func (r *Reconciler) processPod(ctx context.Context, pod *corev1.Pod) {
+func (r *KubernetesReconciler) processPod(ctx context.Context, pod *corev1.Pod) {
 	serviceName, ok := pod.Labels[nameLabel]
 	if !ok {
 		return // no serviceName set -> Not our pod
@@ -88,11 +88,11 @@ func isPodReady(pod *corev1.Pod) bool {
 	return false
 }
 
-func (r *Reconciler) getRunningPodEndpointsForServiceAndType(ctx context.Context, namespace string, serviceName string, typeName string, port uint32) ([]*protoCommon.Endpoint, error) {
+func (r *KubernetesReconciler) getRunningPodEndpointsForServiceAndType(ctx context.Context, namespace string, serviceName string, typeName string, port uint32) ([]*protoCommon.Endpoint, error) {
 	return r.getRunningPodEndpointsFromListOptions(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s,%s=%s,%s=%s", namespaceLabel, namespace, nameLabel, serviceName, typeLabel, typeName)}, port)
 }
 
-func (r *Reconciler) getRunningPodEndpointsFromListOptions(ctx context.Context, options metav1.ListOptions, port uint32) ([]*protoCommon.Endpoint, error) {
+func (r *KubernetesReconciler) getRunningPodEndpointsFromListOptions(ctx context.Context, options metav1.ListOptions, port uint32) ([]*protoCommon.Endpoint, error) {
 	pods, err := r.clientset.CoreV1().Pods(config.GlobalConfig.ServiceNamespace).List(ctx, options)
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (r *Reconciler) getRunningPodEndpointsFromListOptions(ctx context.Context, 
 	return endpoints, nil
 }
 
-func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, serviceName string) error {
+func (r *KubernetesReconciler) ReconcilePods(ctx context.Context, namespace string, serviceName string) error {
 	lbs, err := r.getRunningPodEndpointsForServiceAndType(ctx, namespace, serviceName, typeLabelLB, config.GlobalConfig.LoadBalancerControlPort)
 	if err != nil {
 		return err
@@ -155,7 +155,7 @@ func (r *Reconciler) ReconcilePods(ctx context.Context, namespace string, servic
 	return nil
 }
 
-func (r *Reconciler) PropagateStorageToLoadBalancers(ctx context.Context, endpoints []*protoCommon.Endpoint) {
+func (r *KubernetesReconciler) PropagateStorageToLoadBalancers(ctx context.Context, endpoints []*protoCommon.Endpoint) {
 	lbEndpoints, err := r.getRunningPodEndpointsFromListOptions(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s", typeLabel, typeLabelLB)}, config.GlobalConfig.LoadBalancerControlPort)
 	if err != nil {
 		logger.Warnf("error getting load balancers from cluster", "error", err)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	commonCommunication "github.com/kulycloud/common/communication"
 	"github.com/kulycloud/common/logging"
+	protoCommon "github.com/kulycloud/protocol/common"
 	"github.com/kulycloud/service-manager-k8s/config"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -25,12 +26,20 @@ const (
 
 var logger = logging.GetForComponent("reconciler")
 
-type Reconciler struct {
+type Reconciler interface {
+	ReconcileDeployments(ctx context.Context, namespace string) error
+	PropagateStorageToLoadBalancers(ctx context.Context, endpoints []*protoCommon.Endpoint)
+	MonitorCluster(ctx context.Context) error
+}
+
+var _ Reconciler = &KubernetesReconciler{}
+
+type KubernetesReconciler struct {
 	storage *commonCommunication.StorageCommunicator
 	clientset *kubernetes.Clientset
 }
 
-func NewReconciler(storage *commonCommunication.StorageCommunicator) (*Reconciler, error) {
+func NewKubernetesReconciler(storage *commonCommunication.StorageCommunicator) (*KubernetesReconciler, error) {
 	var configObj *rest.Config
 	var err error
 
@@ -51,13 +60,13 @@ func NewReconciler(storage *commonCommunication.StorageCommunicator) (*Reconcile
 		return nil, fmt.Errorf("error parsing config: %w", err)
 	}
 
-	return &Reconciler{
+	return &KubernetesReconciler{
 		storage: storage,
 		clientset: clientset,
 	}, nil
 }
 
-func (r *Reconciler) CheckAndSetup(ctx context.Context) error {
+func (r *KubernetesReconciler) CheckAndSetup(ctx context.Context) error {
 	_, err := r.clientset.CoreV1().Namespaces().Get(ctx, config.GlobalConfig.ServiceNamespace, metav1.GetOptions{})
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -68,7 +77,7 @@ func (r *Reconciler) CheckAndSetup(ctx context.Context) error {
 	return nil
 }
 
-func (r *Reconciler) createNamespace(ctx context.Context) error {
+func (r *KubernetesReconciler) createNamespace(ctx context.Context) error {
 	logger.Info("creating namespace")
 	_, err := r.clientset.CoreV1().Namespaces().Create(ctx, &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
