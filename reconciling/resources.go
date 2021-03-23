@@ -105,7 +105,7 @@ func buildDeploymentFromService(name *protoStorage.NamespacedName, service *prot
 	return &deployment
 }
 
-func buildLoadBalancerDeploymentFromService(name *protoStorage.NamespacedName, service *protoStorage.Service) *appsv1.Deployment {
+func buildLoadBalancerDeploymentFromService(name *protoStorage.NamespacedName, _ *protoStorage.Service) *appsv1.Deployment {
 	var replicas int32 = 2
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

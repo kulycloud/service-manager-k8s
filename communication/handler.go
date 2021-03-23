@@ -1,19 +1,13 @@
 package communication
 
 import (
-	"errors"
 	commonCommunication "github.com/kulycloud/common/communication"
-	"github.com/kulycloud/common/logging"
 	protoServices "github.com/kulycloud/protocol/services"
 )
 
 var ControlPlane *commonCommunication.ControlPlaneCommunicator
 
 var _ protoServices.ServiceManagerServer = &ServiceManagerHandler{}
-
-var ErrStorageNotReady = errors.New("storage is not ready")
-
-var logger = logging.GetForComponent("handler")
 
 type ServiceManagerHandler struct {
 	protoServices.UnimplementedServiceManagerServer
