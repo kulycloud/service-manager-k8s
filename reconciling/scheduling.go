@@ -37,6 +37,10 @@ func (scheduler *ReconcileScheduler) onConfigurationChangedEvent(event *commonCo
 	if event.Resource.Type != ResourceTypeService {
 		return
 	}
+	if !scheduler.storage.Ready() {
+		return
+	}
+
 	logger.Infow("reconciling namespace",
 		"trigger", "event",
 		"namespace", event.Resource.Namespace)
