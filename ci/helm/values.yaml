@@ -1,2 +1,2 @@
 image: ghcr.io/kulycloud/service-manager-k8s
-loadBalancerImage: ghcr.io/kulycloud/load-balancer:1616012235
+loadBalancerImage: ghcr.io/kulycloud/load-balancer:1616073117
